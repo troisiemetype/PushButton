@@ -23,7 +23,8 @@ PushButton bouton = PushButton();
 
 void setup(){
 	Serial.begin(115200);
-	bouton.begin(12);
+	bouton.begin(4);
+
 //	pinMode(12, INPUT_PULLUP);
 
 }
@@ -36,27 +37,40 @@ void loop(){
 	bool released = bouton.isReleased();
 	bool longPressed = bouton.isLongPressed();
 	bool longReleased = bouton.isLongReleased();
-	bool justPressed = bouton.justPressed();
-	bool justReleased = bouton.justReleased();
+//	bool justPressed = bouton.justPressed();
+//	bool justReleased = bouton.justReleased();
+
+	bool justDoubleClicked = bouton.justDoubleClicked();
+	bool justClicked = bouton.justClicked();
+	bool justLongClicked = bouton.justLongClicked();
 
 
-	if(pushed){
-		Serial.println("pushed");
+	if(0){
+		Serial.println("pressed");
 	}
-	if(released){
+	if(0){
 		Serial.println("released");
 	}
-	if(justPressed){
+	if(0){
 		Serial.println("just pressed");
 	}
-	if(justReleased){
+	if(0){
 		Serial.println("just released");
 	}
-	if(longPressed){
+	if(0){
 		Serial.println("long pressed");
 	}
-	if(longReleased){
+	if(0){
 		Serial.println("long released");
+	}
+	if(justClicked){
+		Serial.println("clicked");
+	}
+	if(justLongClicked){
+		Serial.println("long clicked");
+	}
+	if(justDoubleClicked){
+		Serial.println("double clicked");
 	}
 	
 //	Serial.println(digitalRead(12));

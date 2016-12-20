@@ -21,16 +21,20 @@
 
 #include <Arduino.h>
 
+#define PULLUP 			0x3
+#define PULLDOWN        0x4
+
 class PushButton{
 
 public:
 
 	PushButton();
 
-	void begin(int pin/*, byte mode = INPUT_PULLUP*/);
+	void begin(int pin, byte mode = INPUT_PULLUP);
 
 	void setDebounceDelay(int delay);
 	void setLongDelay(int delay);
+	void setDoubleDelay(int delay);
 
 	bool update();
 	bool isPressed();
@@ -41,14 +45,20 @@ public:
 	bool justPressed();
 	bool justReleased();
 
+	bool justClicked();
+	bool justLongClicked();
+	bool justDoubleClicked();
+
 protected:
 
 	int _pin;
-	bool _pinMode;
+	byte _pinMode;
 
 	bool _state;
 	bool _pState;
 	bool _longState;
+	bool _longClick;
+	bool _doubleClick;
 	bool _now;
 	bool _prev;
 
@@ -58,9 +68,11 @@ protected:
 	bool _invert;
 
 	long _time;
+	long _timeDouble;
 
 	int _debounceDelay;
 	int _longDelay;
+	int _doubleDelay;
 
 };
 
