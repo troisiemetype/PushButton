@@ -124,6 +124,10 @@ bool PushButton::update(){
 		_isJustPressed = false;
 		_isJustReleased = false;
 
+		if(isPressed()){
+			_longClick = false;
+		}
+
 		if(isReleased()){
 			if((millis() - _timeDouble) < _doubleDelay){
 				_doubleClick = true;
@@ -180,6 +184,8 @@ bool PushButton::justPressed(){
 
 //Return true when button is newly released.
 //Returns true only once, then is needs to be pressed to return true again.
+//click methods are based on it, so don't use it if you want to call justClicked(), justLongClicked() or 
+//justDoubleClick().
 bool PushButton::justReleased(){
 	if(isReleased() && !_isJustReleased){
 		_isJustReleased = true;
