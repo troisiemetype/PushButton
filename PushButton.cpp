@@ -69,45 +69,28 @@ void PushButton::begin(byte mode){
 	_pinMode = mode;
 
 	if(_pinMode == INPUT_PULLUP || _pinMode == PULLUP){
-/*		_invert = true;
+		_invert = true;
 
 		_state = true;
 		_pState = true;
 		_now = true;
 		_prev = true;
-*/
-		_state |= _BV(PB_ST_INVERT);
 
-		_state |= _BV(PB_ST_STAT);
-		_state |= _BV(PB_ST_PREV_STATE);
-		_state |= _BV(PB_ST_NOW);
-		_state |= _BV(PB_ST_PREV);
 	} else {
-/*		_invert = false;
+		_invert = false;
 
 		_state = false;
 		_pState = false;
 		_now = false;
 		_prev = false;
-*/
-		_state &= ~_BV(PB_ST_INVERT);
 
-		_state &= ~_BV(PB_ST_STATE);
-		_state &= ~_BV(PB_ST_PREV_STATE);
-		_state &= ~_BV(PB_ST_NOW);
-		_state &= ~_BV(PB_ST_PREV);
 	}
-/*
+
 	_longState = false;
 	_longClick = false;
 
 	_isJustPressed = true;
 	_isJustReleased = true;
-*/
-	_state &= ~_BV(PB_ST_LONG_STATE);
-	_state &= ~_BV(PB_ST_LONG_CLIC);
-	_state |= _BV(PB_ST_JUST_PRESSED);
-	_state |= _BV(PB_ST_JUST_RELEASED);
 
 }
 
@@ -151,14 +134,8 @@ bool PushButton::update(){
 bool PushButton::update(bool state){
 
 	//Store the previous instant state, read the new one.
-//	_prev = _now;
-//	_now = state;
-
-	_state &= _BV(PB_ST_PREV);
-	_state |= (_state & PB_ST_NOW) << PB_ST_PREV;
-
-	_state &= _BV(PB_ST_NOW);
-	_state |= (_state & PB_ST_STATE) << PB_ST_NOW;
+	_prev = _now;
+	_now = state;
 
 	//If different, set timer to zero
 	if(_now != _prev){
