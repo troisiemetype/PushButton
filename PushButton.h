@@ -30,12 +30,14 @@ public:
 
 	PushButton();
 
-	void begin(int pin, byte mode = INPUT_PULLUP);
+	void begin(byte mode);
+	void begin(int pin, byte mode);
 
 	void setDebounceDelay(int delay);
 	void setLongDelay(int delay);
 	void setDoubleDelay(int delay);
 
+	bool update(bool state);
 	bool update();
 	bool isPressed();
 	bool isReleased();
@@ -51,21 +53,36 @@ public:
 
 protected:
 
+	enum buttonState_t{
+		PB_ST_NOW = 0,
+		PB_ST_PREV = 1,
+		PB_ST_STATE = 2,
+		PB_ST_PREV_STATE = 3,
+		PB_ST_INVERT = 4,
+		PB_ST_LONG_STATE = 5,
+		PB_ST_LONG_CLIC = 6,
+		PB_ST_DOUBLE_CLIC = 7,
+		PB_ST_JUST_PRESSED = 8,
+		PB_ST_JUST_RELEASED = 9,
+	}
+
 	int _pin;
 	byte _pinMode;
 
-	bool _state;
-	bool _pState;
-	bool _longState;
-	bool _longClick;
-	bool _doubleClick;
-	bool _now;
-	bool _prev;
+	uint16_t _state;
 
-	bool _isJustPressed;
-	bool _isJustReleased;
+//	bool _state;
+//	bool _pState;
+//	bool _longState;
+//	bool _longClick;
+//	bool _doubleClick;
+//	bool _now;
+//	bool _prev;
 
-	bool _invert;
+//	bool _isJustPressed;
+//	bool _isJustReleased;
+
+//	bool _invert;
 
 	long _time;
 	long _timeDouble;

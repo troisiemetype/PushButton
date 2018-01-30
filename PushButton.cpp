@@ -19,8 +19,16 @@
 /*
  * This library is for reading buttons.
  * Simply create a new instance of the library in your sketch.
- * Call begin() and pass the number of the pin the button is attached to.
+
+ * This library can manage two types of buttons:
+ * If a pin is to be associated with the button (most common case);
+ * Call begin() and pass the number of the pin the button is attached to, and the type of button
+ * (INPUT, OR INPUT_PULLUP).
  * Call update() as often has possible, then use the different methods provided to know switch state.
+ *
+ * If the button cannot read its own pin, e.g. if it's linked with a port expander:
+ * Call begin() and pass the type of button (INPUT_PULLUP, PULLUP, or PULLDOWN).
+ * Call update() as often as possible, and pass the button state as a boolean.
  */
 
 /*
@@ -29,9 +37,12 @@
  * Once done, you can call an update for each group of buttons.
  * The buttons attached to the group can be added or removed at any moment, as they are dynamicly attached.
  * Remove a button from a group doesn't suppress it, it will still be usable alone and/or in other groups.
+ *
+ * Nota: For now, PushButtonGroup can only manage buttons that handle their pin.
+ * If buttons needs their state to be passed to update(), it won't work.
  */
 
- /* WARNING: this class uses dynamic memory allocation.
+ /* WARNING: the PushButtonGroup class uses dynamic memory allocation.
   * Compiler won't warn you about using too much memory size.
   * It's up to you to know that you don't overflow what can be used.
   * Each button set occupies 19 bytes of memory, and the ButtonGroup is 2 bytes per button, + 2.
@@ -41,7 +52,7 @@
 
 #include "PushButton.h"
 
-//this creates an instance of a push button.
+// Create an instance of a push button.
 PushButton::PushButton(){
 
 	_debounceDelay = 5;
@@ -52,7 +63,55 @@ PushButton::PushButton(){
 
 }
 
-//Initialize a button with the given pin, and sets up initial state
+// Inialize a button without pin, for use with an external trigger ( a port expander for example)
+void PushButton::begin(byte mode){
+
+	_pinMode = mode;
+
+	if(_pinMode == INPUT_PULLUP || _pinMode == PULLUP){
+/*		_invert = true;
+
+		_state = true;
+		_pState = true;
+		_now = true;
+		_prev = true;
+*/
+		_state |= _BV(PB_ST_INVERT);
+
+		_state |= _BV(PB_ST_STAT);
+		_state |= _BV(PB_ST_PREV_STATE);
+		_state |= _BV(PB_ST_NOW);
+		_state |= _BV(PB_ST_PREV);
+	} else {
+/*		_invert = false;
+
+		_state = false;
+		_pState = false;
+		_now = false;
+		_prev = false;
+*/
+		_state &= ~_BV(PB_ST_INVERT);
+
+		_state &= ~_BV(PB_ST_STATE);
+		_state &= ~_BV(PB_ST_PREV_STATE);
+		_state &= ~_BV(PB_ST_NOW);
+		_state &= ~_BV(PB_ST_PREV);
+	}
+/*
+	_longState = false;
+	_longClick = false;
+
+	_isJustPressed = true;
+	_isJustReleased = true;
+*/
+	_state &= ~_BV(PB_ST_LONG_STATE);
+	_state &= ~_BV(PB_ST_LONG_CLIC);
+	_state |= _BV(PB_ST_JUST_PRESSED);
+	_state |= _BV(PB_ST_JUST_RELEASED);
+
+}
+
+// Initialize a button with the given pin, and sets up initial state
 void PushButton::begin(int pin, byte mode){
 
 	_pin = pin;
@@ -64,51 +123,42 @@ void PushButton::begin(int pin, byte mode){
 		pinMode(_pin, INPUT);
 	}
 
-	if(_pinMode == INPUT_PULLUP || _pinMode == PULLUP){
-		_invert = true;
-
-		_state = true;
-		_pState = true;
-		_now = true;
-		_prev = true;
-	} else {
-		_invert = false;
-
-		_state = false;
-		_pState = false;
-		_now = false;
-		_prev = false;
-	}
-
-	_longState = false;
-	_longClick = false;
-
-	_isJustPressed = true;
-	_isJustReleased = true;
+	begin(mode);
 }
 
-//Set debounce delay
+// Set debounce delay
 void PushButton::setDebounceDelay(int delay){
 	_debounceDelay = delay;
 }
 
-//Set delay for long clicks and releases.
+// Set delay for long clicks and releases.
 void PushButton::setLongDelay(int delay){
 	_longDelay = delay;
 }
 
-//Set delay for double clicks.
+// Set delay for double clicks.
 void PushButton::setDoubleDelay(int delay){
 	_doubleDelay = delay;
 }
 
 
-//Function that update reading. To be called as often as possible, typically at the beginning of each loop.
+// Function that update reading when the button handles its own pin.
 bool PushButton::update(){
+	return update(digitalRead(_pin));
+}
+
+// Function that update reading. To be called as often as possible, typically at the beginning of each loop.
+bool PushButton::update(bool state){
 
 	//Store the previous instant state, read the new one.
-	_prev = _now;
-	_now = digitalRead(_pin);
+//	_prev = _now;
+//	_now = state;
+
+	_state &= _BV(PB_ST_PREV);
+	_state |= (_state & PB_ST_NOW) << PB_ST_PREV;
+
+	_state &= _BV(PB_ST_NOW);
+	_state |= (_state & PB_ST_STATE) << PB_ST_NOW;
 
 	//If different, set timer to zero
 	if(_now != _prev){
@@ -151,28 +201,28 @@ bool PushButton::update(){
 	return false;
 }
 
-//Return true if button is pressed.
+// Return true if button is pressed.
 bool PushButton::isPressed(){
 	return _state ^ _invert;
 }
 
-//Return true if button is released.
+// Return true if button is released.
 bool PushButton::isReleased(){
 	return !_state ^ _invert;
 }
 
-//Return true when the button is pressed for a long time.
+// Return true when the button is pressed for a long time.
 bool PushButton::isLongPressed(){
 	return (_state ^ _invert) && _longState;
 }
 
-//Return true if button is released for a long time
+// Return true if button is released for a long time
 bool PushButton::isLongReleased(){
 	return (!_state ^ _invert) && _longState;
 }
 
-//Return true when button is newly pressed.
-//Returns true only once, then it needs to be released to return true again.
+// Return true when button is newly pressed.
+// Returns true only once, then it needs to be released to return true again.
 bool PushButton::justPressed(){
 	if(isPressed() && !_isJustPressed){
 		_isJustPressed = true;
@@ -182,10 +232,10 @@ bool PushButton::justPressed(){
 	}
 }
 
-//Return true when button is newly released.
-//Returns true only once, then is needs to be pressed to return true again.
-//click methods are based on it, so don't use it if you want to call justClicked(), justLongClicked() or 
-//justDoubleClick().
+// Return true when button is newly released.
+// Returns true only once, then is needs to be pressed to return true again.
+// click methods are based on it, so don't use it if you want to call justClicked(), justLongClicked() or 
+// justDoubleClick().
 bool PushButton::justReleased(){
 	if(isReleased() && !_isJustReleased){
 		_isJustReleased = true;
@@ -195,16 +245,16 @@ bool PushButton::justReleased(){
 	}
 }
 
-//Return true if a click has happened, that is not a long click, or the first of a double click.
-//This function will return false if a click has happenned for a time lesser than doubleDelay.
-//If you need to immediately know a clicked has been made, use justReleased() instead.
+// Return true if a click has happened, that is not a long click, or the first of a double click.
+// This function will return false if a click has happenned for a time lesser than doubleDelay.
+// If you need to immediately know a clicked has been made, use justReleased() instead.
 bool PushButton::justClicked(){
 	if(((millis() - _timeDouble) < _doubleDelay) || (_longClick || _doubleClick)) return false;
 
 	return justReleased();
 }
 
-//Return true if a long click has happened.
+// Return true if a long click has happened.
 bool PushButton::justLongClicked(){
 	if(!_longClick) return false;
 
@@ -216,7 +266,7 @@ bool PushButton::justLongClicked(){
 	}
 }
 
-//return true if a double click has happened.
+// Return true if a double click has happened.
 bool PushButton::justDoubleClicked(){
 	if(!_doubleClick) return false;
 
@@ -229,18 +279,18 @@ bool PushButton::justDoubleClicked(){
 }
 
 
-//Create a button group.
+// Create a button group.
 PushButtonGroup::PushButtonGroup(){
 	buttons = NULL;
 	buttonsSize = 0;
 }
 
-//Delete a button group.
+// Delete a button group.
 PushButtonGroup::~PushButtonGroup(){
 	free(buttons);
 }
 
-//Add a new button to the group. Use ralloc to dynamicly change the size of the pointers table
+// Add a new button to the group. Use ralloc to dynamicly change the size of the pointers table
 void PushButtonGroup::add(PushButton* button){
 	buttonsSize++;
 	PushButton **tmp = (PushButton**)realloc(buttons, sizeof(PushButton) * buttonsSize);
@@ -251,7 +301,7 @@ void PushButtonGroup::add(PushButton* button){
 	buttons[buttonsSize - 1] = button;
 }
 
-//remove a button from the group.
+// Remove a button from the group.
 void PushButtonGroup::remove(PushButton* button){
 	buttonsSize--;
 	if(buttonsSize == 0){
