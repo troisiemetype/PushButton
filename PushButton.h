@@ -30,12 +30,12 @@ public:
 
 	PushButton();
 
-	void begin(byte mode);
-	void begin(int pin, byte mode);
+	void begin(const uint8_t& mode);
+	void begin(const uint8_t& pin, const uint8_t& mode);
 
-	void setDebounceDelay(int delay);
-	void setLongDelay(int delay);
-	void setDoubleDelay(int delay);
+	void setDebounceDelay(int16_t delay);
+	void setLongDelay(int16_t delay);
+	void setDoubleDelay(int16_t delay);
 
 	bool update(bool state);
 	bool update();
@@ -53,10 +53,8 @@ public:
 
 protected:
 
-	int _pin;
-	byte _pinMode;
-
-	uint16_t _state;
+	uint8_t _pin;
+	uint8_t _pinMode;
 
 	bool _state;
 	bool _pState;
@@ -71,12 +69,12 @@ protected:
 
 	bool _invert;
 
-	long _time;
-	long _timeDouble;
+	uint32_t _time;
+	uint32_t _timeDouble;
 
-	int _debounceDelay;
-	int _longDelay;
-	int _doubleDelay;
+	uint16_t _debounceDelay;
+	uint16_t _longDelay;
+	uint16_t _doubleDelay;
 
 };
 
@@ -95,7 +93,7 @@ public:
 protected:
 
 	PushButton **buttons;
-	int buttonsSize;
+	uint8_t buttonsSize;
 
 };
 

@@ -64,7 +64,7 @@ PushButton::PushButton(){
 }
 
 // Inialize a button without pin, for use with an external trigger ( a port expander for example)
-void PushButton::begin(byte mode){
+void PushButton::begin(const uint8_t& mode){
 
 	_pinMode = mode;
 
@@ -95,7 +95,7 @@ void PushButton::begin(byte mode){
 }
 
 // Initialize a button with the given pin, and sets up initial state
-void PushButton::begin(int pin, byte mode){
+void PushButton::begin(const uint8_t& pin, const uint8_t& mode){
 
 	_pin = pin;
 	_pinMode = mode;
@@ -110,17 +110,17 @@ void PushButton::begin(int pin, byte mode){
 }
 
 // Set debounce delay
-void PushButton::setDebounceDelay(int delay){
+void PushButton::setDebounceDelay(uint16_t delay){
 	_debounceDelay = delay;
 }
 
 // Set delay for long clicks and releases.
-void PushButton::setLongDelay(int delay){
+void PushButton::setLongDelay(uint16_t delay){
 	_longDelay = delay;
 }
 
 // Set delay for double clicks.
-void PushButton::setDoubleDelay(int delay){
+void PushButton::setDoubleDelay(uint16_t delay){
 	_doubleDelay = delay;
 }
 
@@ -291,10 +291,10 @@ void PushButtonGroup::remove(PushButton* button){
 		return;
 	}
 	
-	int top = buttonsSize + 1;
-	int count = 0;
+	uint8_t top = buttonsSize + 1;
+	uint8_t count = 0;
 
-	for(int i = 0; i < top; i++){
+	for(uint8_t i = 0; i < top; i++){
 		if(buttons[i] == button){continue;}
 		tmp[count] = buttons[i];
 		count++;
@@ -306,7 +306,7 @@ void PushButtonGroup::remove(PushButton* button){
 //Update the readings of all buttons.
 bool PushButtonGroup::update(){
 	bool state = false;
-	for(int i = 0; i < buttonsSize; i++){
+	for(uint8_t i = 0; i < buttonsSize; i++){
 		if(buttons[i]->update()){
 			state = true;
 /*
