@@ -56,21 +56,22 @@ protected:
 	uint8_t _pin;
 	uint8_t _pinMode;
 
-	bool _state;
-	bool _pState;
-	bool _longState;
-	bool _longClick;
-	bool _doubleClick;
-	bool _now;
-	bool _prev;
+	struct{
+		uint16_t state : 1;
+		uint16_t pState : 1;
+		uint16_t longState : 1;
+		uint16_t longClick : 1;
+		uint16_t doubleClick : 1;
+		uint16_t now : 1;
+		uint16_t prev : 1;
+		uint16_t isJustPressed : 1;
+		uint16_t isJustReleased : 1;
+		uint16_t invert : 1;
+	} _states;
 
-	bool _isJustPressed;
-	bool _isJustReleased;
 
-	bool _invert;
-
-	uint32_t _time;
-	uint32_t _timeDouble;
+	uint16_t _time;
+	uint16_t _timeDouble;
 
 	uint16_t _debounceDelay;
 	uint16_t _longDelay;

@@ -69,28 +69,28 @@ void PushButton::begin(const uint8_t& mode){
 	_pinMode = mode;
 
 	if(_pinMode == INPUT_PULLUP || _pinMode == PULLUP){
-		_invert = true;
+		_states.invert = true;
 
-		_state = true;
-		_pState = true;
-		_now = true;
-		_prev = true;
+		_states.state = true;
+		_states.pState = true;
+		_states.now = true;
+		_states.prev = true;
 
 	} else {
-		_invert = false;
+		_states.invert = false;
 
-		_state = false;
-		_pState = false;
-		_now = false;
-		_prev = false;
+		_states.state = false;
+		_states.pState = false;
+		_states.now = false;
+		_states.prev = false;
 
 	}
 
-	_longState = false;
-	_longClick = false;
+	_states.longState = false;
+	_states.longClick = false;
 
-	_isJustPressed = true;
-	_isJustReleased = true;
+	_states.isJustPressed = true;
+	_states.isJustReleased = true;
 
 }
 
@@ -134,34 +134,34 @@ bool PushButton::update(){
 bool PushButton::update(bool state){
 
 	//Store the previous instant state, read the new one.
-	_prev = _now;
-	_now = state;
+	_states.prev = _states.now;
+	_states.now = state;
 
 	uint32_t instantTime = millis();
 
 	//If different, set timer to zero
-	if(_now != _prev){
+	if(_states.now != _states.prev){
 		_time = instantTime;
 		return false;
 	}
 
 	//If instant state is different than button state, and time elapsed greater thant debounce time, change state.
-	if((_state != _now) && ((instantTime - _time) > _debounceDelay)){
-		_pState = _state;
-		_state = _now;
-		_longState = false;
-		_isJustPressed = false;
-		_isJustReleased = false;
+	if((_states.state != _states.now) && ((instantTime - _time) > _debounceDelay)){
+		_states.pState = _states.state;
+		_states.state = _states.now;
+		_states.longState = false;
+		_states.isJustPressed = false;
+		_states.isJustReleased = false;
 
 		if(isPressed()){
-			_longClick = false;
+			_states.longClick = false;
 		}
 
 		if(isReleased()){
 			if((instantTime - _timeDouble) < _doubleDelay){
-				_doubleClick = true;
+				_states.doubleClick = true;
 			} else {
-				_doubleClick = false;
+				_states.doubleClick = false;
 			}
 			_timeDouble = instantTime;
 		}
@@ -169,10 +169,10 @@ bool PushButton::update(bool state){
 	}
 
 	//If time elapsed since changed is greater than delay for long presses, set longState.
-	if(!_longState && ((instantTime - _time) > _longDelay)){
-		_longState = true;
+	if(!_states.longState && ((instantTime - _time) > _longDelay)){
+		_states.longState = true;
 		if(isPressed()){
-			_longClick = true;
+			_states.longClick = true;
 		}
 		return true;
 	}
@@ -182,29 +182,29 @@ bool PushButton::update(bool state){
 
 // Return true if button is pressed.
 bool PushButton::isPressed(){
-	return _state ^ _invert;
+	return _states.state ^ _states.invert;
 }
 
 // Return true if button is released.
 bool PushButton::isReleased(){
-	return !_state ^ _invert;
+	return !_states.state ^ _states.invert;
 }
 
 // Return true when the button is pressed for a long time.
 bool PushButton::isLongPressed(){
-	return (_state ^ _invert) && _longState;
+	return (_states.state ^ _states.invert) && _states.longState;
 }
 
 // Return true if button is released for a long time
 bool PushButton::isLongReleased(){
-	return (!_state ^ _invert) && _longState;
+	return (!_states.state ^ _states.invert) && _states.longState;
 }
 
 // Return true when button is newly pressed.
 // Returns true only once, then it needs to be released to return true again.
 bool PushButton::justPressed(){
-	if(isPressed() && !_isJustPressed){
-		_isJustPressed = true;
+	if(isPressed() && !_states.isJustPressed){
+		_states.isJustPressed = true;
 		return true;
 	} else {
 		return false;
@@ -216,8 +216,8 @@ bool PushButton::justPressed(){
 // click methods are based on it, so don't use it if you want to call justClicked(), justLongClicked() or 
 // justDoubleClick().
 bool PushButton::justReleased(){
-	if(isReleased() && !_isJustReleased){
-		_isJustReleased = true;
+	if(isReleased() && !_states.isJustReleased){
+		_states.isJustReleased = true;
 		return true;
 	} else {
 		return false;
@@ -228,17 +228,17 @@ bool PushButton::justReleased(){
 // This function will return false if a click has happenned for a time lesser than doubleDelay.
 // If you need to immediately know a clicked has been made, use justReleased() instead.
 bool PushButton::justClicked(){
-	if(((millis() - _timeDouble) < _doubleDelay) || (_longClick || _doubleClick)) return false;
+	if(((millis() - _timeDouble) < _doubleDelay) || (_states.longClick || _states.doubleClick)) return false;
 
 	return justReleased();
 }
 
 // Return true if a long click has happened.
 bool PushButton::justLongClicked(){
-	if(!_longClick) return false;
+	if(!_states.longClick) return false;
 
 	if(justReleased()){
-		_longClick = false;
+		_states.longClick = false;
 		return true;
 	} else {
 		return false;
@@ -247,10 +247,10 @@ bool PushButton::justLongClicked(){
 
 // Return true if a double click has happened.
 bool PushButton::justDoubleClicked(){
-	if(!_doubleClick) return false;
+	if(!_states.doubleClick) return false;
 
 	if(justReleased()){
-		_doubleClick = false;
+		_states.doubleClick = false;
 		return true;
 	} else {
 		return false;
