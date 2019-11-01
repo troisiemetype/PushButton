@@ -33,9 +33,9 @@ public:
 	void begin(const uint8_t& mode);
 	void begin(const uint8_t& pin, const uint8_t& mode);
 
-	void setDebounceDelay(int16_t delay);
-	void setLongDelay(int16_t delay);
-	void setDoubleDelay(int16_t delay);
+	void setDebounceDelay(uint16_t delay);
+	void setLongDelay(uint16_t delay);
+	void setDoubleDelay(uint16_t delay);
 
 	bool update(bool state);
 	bool update();
