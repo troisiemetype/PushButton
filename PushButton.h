@@ -21,8 +21,12 @@
 
 #include <Arduino.h>
 
+#ifndef PULLUP
 #define PULLUP 			0x3
+#endif
+#ifndef PULLDOWN
 #define PULLDOWN        0x4
+#endif
 
 class PushButton{
 
@@ -70,8 +74,8 @@ protected:
 	} _states;
 
 
-	uint16_t _time;
-	uint16_t _timeDouble;
+	uint32_t _time;
+	uint32_t _timeDouble;
 
 	uint16_t _debounceDelay;
 	uint16_t _longDelay;

@@ -55,11 +55,12 @@
 // Create an instance of a push button.
 PushButton::PushButton(){
 
-	_debounceDelay = 5;
+	_debounceDelay = 1;
 	_longDelay = 1000;
-	_doubleDelay = 300;
+	_doubleDelay = 100;
 
 	_time = millis();
+	_timeDouble = _time;
 
 }
 
@@ -269,10 +270,10 @@ PushButtonGroup::~PushButtonGroup(){
 	free(buttons);
 }
 
-// Add a new button to the group. Use ralloc to dynamicly change the size of the pointers table
+// Add a new button to the group. Use realloc to dynamicly change the size of the pointers table
 void PushButtonGroup::add(PushButton* button){
 	buttonsSize++;
-	PushButton **tmp = (PushButton**)realloc(buttons, sizeof(PushButton) * buttonsSize);
+	PushButton **tmp = (PushButton**)realloc(buttons, sizeof(PushButton*) * buttonsSize);
 	if(tmp == NULL){
 		return;
 	}
@@ -281,6 +282,7 @@ void PushButtonGroup::add(PushButton* button){
 }
 
 // Remove a button from the group.
+// To be modified : guard for the case when remove is called while no buttons was privously added.
 void PushButtonGroup::remove(PushButton* button){
 	buttonsSize--;
 	if(buttonsSize == 0){
@@ -288,7 +290,7 @@ void PushButtonGroup::remove(PushButton* button){
 		return;
 	}
 
-	PushButton **tmp = (PushButton**)realloc(buttons, sizeof(PushButton) * buttonsSize);
+	PushButton **tmp = (PushButton**)realloc(buttons, sizeof(PushButton*) * buttonsSize);
 	if(tmp == NULL){
 		return;
 	}
